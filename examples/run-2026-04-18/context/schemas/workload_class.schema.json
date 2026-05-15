@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://moe-kernel-agent/schemas/workload_class.schema.json",
+  "title": "WorkloadClasses",
+  "description": "Produced by Phase 3.A, consumed by Phase 3.B and 3.C.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["class_id", "bottleneck", "workload_indices", "representative_index", "target_metric"],
+    "additionalProperties": false,
+    "properties": {
+      "class_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_]*$"},
+      "bottleneck": {"type": "string", "description": "One sentence from the profile citing stall reason, bandwidth cap, occupancy etc."},
+      "workload_indices": {"type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 0}, "uniqueItems": true},
+      "axes_range": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": "integer"}}},
+      "representative_index": {"type": "integer", "minimum": 0},
+      "target_metric": {"type": "string"},
+      "best_runtime_ms": {"type": "number", "minimum": 0, "description": "Populated after Phase 3.C."},
+      "winning_technique": {"type": "string"},
+      "converged": {"type": "boolean", "description": "Set true when gap to SOTA is within 1.10x; later iterations skip."}
+    }
+  }
+}

@@ -1,0 +1,44 @@
+✓ Initialized. View run at 
+https://modal.com/apps/xjr2423/main/ap-pMxOgqXTzGycEE2U0kPTnM
+✓ Created objects.
+├── 🔨 Created mount PythonPackage:bench
+└── 🔨 Created function run_benchmark.
+Packing solution from source files...
+Loaded: my-team-solution-v1 (moe_fp8_block_scale_ds_routing_topk8_ng8_kg4_e32_h7168_i2048)
+
+Running benchmark on Modal B200...
+
+[bench] wrote JSON to /home/ubuntu/data/jxu/kernel_agent/trajectory/20260418_025108_iter-8-b/bench_result.json
+COMPILED: True
+CORRECT: True
+RUNTIME: 1.5004
+REF_RUNTIME: 17.1265
+SPEEDUP: 15.02x
+SOTA_GEOMEAN_GAP: 4.163x
+SOTA_TOTAL_HEADROOM_MS: 15.589
+SOTA_CONVERGED: 0/19 (within 1.10x)
+
+[Kernel] TLX installed: False | GEMM1: unknown | GEMM2: unknown
+
+--- moe_fp8_block_scale_ds_routing_topk8_ng8_kg4_e32_h7168_i2048 ---
+  [seq=1] Workload e05c6c03...: PASSED | 0.750 ms | sota=0.063 ms | gap=11.91x | 15.11x speedup | abs_err=2.05e+03, rel_err=3.99e+01
+  [seq=7] Workload b8f4f012...: PASSED | 0.770 ms | sota=0.095 ms | gap=8.11x | 15.13x speedup | abs_err=4.10e+03, rel_err=6.59e+02
+  [seq=14] Workload 8cba5890...: PASSED | 0.797 ms | sota=0.132 ms | gap=6.03x | 16.04x speedup | abs_err=2.56e+03, rel_err=7.02e+02
+  [seq=15] Workload 2e69caee...: PASSED | 0.754 ms | sota=0.091 ms | gap=8.28x | 15.64x speedup | abs_err=2.30e+03, rel_err=1.39e+03
+  [seq=16] Workload a7c2bcfd...: PASSED | 0.797 ms | sota=0.138 ms | gap=5.77x | 16.38x speedup | abs_err=4.10e+03, rel_err=5.49e+03
+  [seq=32] Workload 6230e838...: PASSED | 0.878 ms | sota=0.201 ms | gap=4.37x | 16.56x speedup | abs_err=4.10e+03, rel_err=7.22e+02
+  [seq=52] Workload f7d6ac7c...: PASSED | 0.827 ms | sota=0.179 ms | gap=4.62x | 16.16x speedup | abs_err=4.10e+03, rel_err=1.73e+03
+  [seq=53] Workload fc378037...: PASSED | 0.897 ms | sota=0.230 ms | gap=3.90x | 16.39x speedup | abs_err=4.10e+03, rel_err=3.21e+03
+  [seq=54] Workload 76010cb4...: PASSED | 0.878 ms | sota=0.218 ms | gap=4.03x | 16.34x speedup | abs_err=4.10e+03, rel_err=2.58e+03
+  [seq=55] Workload 81955b1e...: PASSED | 0.900 ms | sota=0.233 ms | gap=3.86x | 16.31x speedup | abs_err=4.10e+03, rel_err=3.24e+03
+  [seq=56] Workload 4822167c...: PASSED | 0.921 ms | sota=0.240 ms | gap=3.84x | 16.50x speedup | abs_err=4.10e+03, rel_err=1.23e+04
+  [seq=57] Workload 74d7ff04...: PASSED | 0.908 ms | sota=0.237 ms | gap=3.83x | 16.58x speedup | abs_err=4.10e+03, rel_err=9.16e+03
+  [seq=58] Workload e626d3e6...: PASSED | 0.930 ms | sota=0.242 ms | gap=3.84x | 16.57x speedup | abs_err=4.10e+03, rel_err=3.86e+03
+  [seq=59] Workload eedc63b2...: PASSED | 0.864 ms | sota=0.202 ms | gap=4.28x | 15.95x speedup | abs_err=4.10e+03, rel_err=6.17e+03
+  [seq=62] Workload 5eadab1e...: PASSED | 0.837 ms | sota=0.200 ms | gap=4.18x | 16.98x speedup | abs_err=4.10e+03, rel_err=1.56e+03
+  [seq=80] Workload 8f1ff9f1...: PASSED | 0.968 ms | sota=0.269 ms | gap=3.60x | 16.75x speedup | abs_err=4.10e+03, rel_err=2.98e+04
+  [seq=901] Workload 1a4c6ba1...: PASSED | 1.596 ms | sota=0.699 ms | gap=2.28x | 13.41x speedup | abs_err=3.40e+05, rel_err=3.38e+13
+  [seq=11948] Workload 58a34f27...: PASSED | 5.432 ms | sota=3.671 ms | gap=1.48x | 6.68x speedup | abs_err=5.18e+05, rel_err=5.18e+13
+  [seq=14107] Workload 5e8dc11c...: PASSED | 7.804 ms | sota=5.579 ms | gap=1.40x | 5.84x speedup | abs_err=5.28e+05, rel_err=4.40e+13
+Stopping app - uncaught exception raised locally: SystemExit(0).
+Runner terminated.

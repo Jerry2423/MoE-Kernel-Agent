@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://moe-kernel-agent/schemas/bench_result.schema.json",
+  "title": "BenchResult",
+  "description": "Machine-readable side-channel emitted by bench/modal_bench.py --json-out. Captured to trajectory/*/bench_result.json.",
+  "type": "object",
+  "required": ["schema_version", "label", "compiled", "correct", "workloads"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "integer", "enum": [1]},
+    "label": {"type": "string", "description": "Matches the label passed to scripts/bench.sh (e.g. 'iter-7', 'baseline')."},
+    "timestamp_utc": {"type": "string", "format": "date-time"},
+    "compiled": {"type": "boolean"},
+    "correct": {"type": "boolean"},
+    "runtime_ms_mean": {"type": "number", "minimum": 0},
+    "ref_runtime_ms_mean": {"type": "number", "minimum": 0},
+    "speedup_mean": {"type": "number"},
+    "sota_geomean_gap": {"type": "number"},
+    "sota_total_headroom_ms": {"type": "number"},
+    "sota_converged_count": {"type": "integer", "minimum": 0},
+    "sota_eligible_count": {"type": "integer", "minimum": 0},
+    "kernel_info": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "workloads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["uuid", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "uuid": {"type": "string"},
+          "seq_len": {"type": ["integer", "null"]},
+          "status": {"type": "string"},
+          "latency_ms": {"type": ["number", "null"]},
+          "reference_latency_ms": {"type": ["number", "null"]},
+          "speedup_factor": {"type": ["number", "null"]},
+          "max_abs_error": {"type": ["number", "null"]},
+          "max_rel_error": {"type": ["number", "null"]},
+          "sota_ms": {"type": ["number", "null"]},
+          "sota_gap": {"type": ["number", "null"]}
+        }
+      }
+    }
+  }
+}

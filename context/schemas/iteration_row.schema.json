@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://moe-kernel-agent/schemas/iteration_row.schema.json",
+  "title": "IterationRow",
+  "description": "One line in solution/iterations.jsonl. Append only. One row per Phase-3 iteration.",
+  "type": "object",
+  "required": ["iter", "class_id", "technique", "source", "status"],
+  "additionalProperties": false,
+  "properties": {
+    "iter": {"type": "integer", "minimum": 1, "description": "Sequential iteration number across the whole phase."},
+    "class_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_]*$"},
+    "technique": {"type": "string"},
+    "source": {"type": "string", "description": "Path to the knowledge file or skill that justified the technique."},
+    "target_bottleneck": {"type": "string"},
+    "median_ms": {"type": "number", "minimum": 0},
+    "baseline_ms": {"type": "number", "minimum": 0, "description": "Previous iteration's median for this class, for quick speedup calc."},
+    "speedup_vs_baseline": {"type": "number"},
+    "worst_regression_pct": {"type": "number", "description": "Worst regression across other classes in percent (positive = regression)."},
+    "status": {"type": "string", "enum": ["improved", "no-change", "regression", "failed", "reverted"]},
+    "bottleneck_next": {"type": "string"},
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+    "notes": {"type": "string"}
+  }
+}

@@ -1,0 +1,447 @@
+✓ Initialized. View run at 
+https://modal.com/apps/xjr2423/main/ap-XYaNuA5Jg0cEnMcN366ehf
+✓ Created objects.
+├── 🔨 Created mount PythonPackage:bench
+└── 🔨 Created function tune_kernel.
+ seq_len  kernel     tpe  configs
+----------------------------------------
+       1   gemm1       1       14
+       1   gemm2       1       18
+       7   gemm1       1       14
+       7   gemm2       1       18
+      14   gemm1       1       14
+      14   gemm2       1       18
+      15   gemm1       1       14
+      15   gemm2       1       18
+      16   gemm1       1       14
+      16   gemm2       1       18
+      32   gemm1       1       14
+      32   gemm2       1       18
+      52   gemm1       1       14
+      52   gemm2       1       18
+      53   gemm1       1       14
+      53   gemm2       1       18
+      54   gemm1       1       14
+      54   gemm2       1       18
+      55   gemm1       1       14
+      55   gemm2       1       18
+      56   gemm1       1       14
+      56   gemm2       1       18
+      57   gemm1       1       14
+      57   gemm2       1       18
+      58   gemm1       1       14
+      58   gemm2       1       18
+      59   gemm1       1       14
+      59   gemm2       1       18
+      62   gemm1       1       14
+      62   gemm2       1       18
+      80   gemm1       2       14
+      80   gemm2       2       18
+     901   gemm1      28       40
+     901   gemm2      28       50
+   11948   gemm1     373       48
+   11948   gemm2     373       54
+   14107   gemm1     440       48
+   14107   gemm2     440       54
+
+Dispatching 38 jobs on B200...
+  [g2 seq=11948 BM=64 BN=128 ns=4 nw=4] FAILED: out of resource: shared memory, Required: 247312, Hardware limit: 232448. Reducing block sizes or `num_stages` may help.
+  [g2 seq=11948 BM=64 BN=128 ns=4 nw=8] FAILED: out of resource: shared memory, Required: 247312, Hardware limit: 232448. Reducing block sizes or `num_stages` may help.
+  [g2 seq=14107 BM=64 BN=128 ns=4 nw=4] FAILED: out of resource: shared memory, Required: 247312, Hardware limit: 232448. Reducing block sizes or `num_stages` may help.
+  [g2 seq=901 BM=64 BN=128 ns=4 nw=4] FAILED: out of resource: shared memory, Required: 247312, Hardware limit: 232448. Reducing block sizes or `num_stages` may help.
+  [g2 seq=14107 BM=64 BN=128 ns=4 nw=8] FAILED: out of resource: shared memory, Required: 247312, Hardware limit: 232448. Reducing block sizes or `num_stages` may help.
+  [g2 seq=901 BM=64 BN=128 ns=4 nw=8] FAILED: out of resource: shared memory, Required: 247312, Hardware limit: 232448. Reducing block sizes or `num_stages` may help.
+   gemm1 seq=     1  BM= 16 BN= 64 ns=3 nw= 4  0.2223 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2223 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2244 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2285 ms
+   gemm2 seq=     1  BM= 16 BN=256 ns=3 nw= 8  0.1689 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1689 ms <-
+      BM= 16 BN=128 ns=3 nw= 4  0.1751 ms
+      BM= 16 BN=128 ns=4 nw= 4  0.1751 ms
+   gemm1 seq=     7  BM= 16 BN= 64 ns=3 nw= 4  0.2181 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2181 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2202 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2264 ms
+   gemm2 seq=     7  BM= 16 BN=256 ns=3 nw= 8  0.1670 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1670 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1749 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1752 ms
+   gemm1 seq=    14  BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2222 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2304 ms
+   gemm2 seq=    14  BM= 16 BN=256 ns=3 nw= 8  0.1689 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1689 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1751 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1769 ms
+   gemm1 seq=    15  BM= 16 BN= 64 ns=3 nw= 4  0.2201 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2201 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2222 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2285 ms
+   gemm2 seq=    15  BM= 16 BN=256 ns=3 nw= 8  0.1690 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1690 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1751 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1771 ms
+   gemm1 seq=    16  BM= 16 BN= 64 ns=3 nw= 4  0.2181 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2181 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2202 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2266 ms
+   gemm2 seq=    16  BM= 16 BN=256 ns=3 nw= 8  0.1672 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1672 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1751 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1752 ms
+   gemm1 seq=    32  BM= 16 BN= 64 ns=3 nw= 4  0.2201 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2201 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2223 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2304 ms
+   gemm2 seq=    32  BM= 16 BN=256 ns=3 nw= 8  0.1712 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1712 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1791 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1792 ms
+   gemm1 seq=    52  BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2241 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2284 ms
+   gemm2 seq=    52  BM= 16 BN=256 ns=3 nw= 8  0.1731 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1731 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1794 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1812 ms
+   gemm1 seq=    53  BM= 16 BN= 64 ns=3 nw= 4  0.2181 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2181 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2213 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2262 ms
+   gemm2 seq=    53  BM= 16 BN=256 ns=3 nw= 8  0.1730 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1730 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1792 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1794 ms
+   gemm1 seq=    54  BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2222 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2285 ms
+   gemm2 seq=    54  BM= 16 BN=256 ns=3 nw= 8  0.1731 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1731 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1792 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1794 ms
+   gemm1 seq=    55  BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2223 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2286 ms
+   gemm2 seq=    55  BM= 16 BN=256 ns=3 nw= 8  0.1732 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1732 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1794 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1812 ms
+   gemm1 seq=    56  BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2222 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2284 ms
+   gemm2 seq=    56  BM= 16 BN=256 ns=3 nw= 8  0.1732 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1732 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1793 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1812 ms
+   gemm1 seq=    57  BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2223 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2284 ms
+   gemm2 seq=    57  BM= 16 BN=256 ns=3 nw= 8  0.1730 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1730 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1792 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1796 ms
+   gemm1 seq=    58  BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2223 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2284 ms
+   gemm2 seq=    58  BM= 16 BN=256 ns=3 nw= 8  0.1733 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1733 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1793 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1812 ms
+   gemm1 seq=    59  BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2225 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2304 ms
+   gemm2 seq=    59  BM= 16 BN=256 ns=3 nw= 8  0.1731 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1731 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1793 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1794 ms
+   gemm1 seq=    62  BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2233 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2294 ms
+   gemm2 seq=    62  BM= 16 BN=256 ns=3 nw= 8  0.1732 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1732 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1794 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1812 ms
+   gemm1 seq=    80  BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms
+      BM= 16 BN= 64 ns=3 nw= 4  0.2202 ms <-
+      BM= 16 BN= 64 ns=4 nw= 4  0.2241 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.2304 ms
+   gemm2 seq=    80  BM= 16 BN=256 ns=3 nw= 8  0.1793 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.1793 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.1853 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.1854 ms
+   gemm1 seq=   901  BM= 32 BN=128 ns=3 nw= 4  0.3041 ms
+      BM= 32 BN=128 ns=3 nw= 4  0.3041 ms <-
+      BM= 32 BN=128 ns=4 nw= 4  0.3082 ms
+      BM= 32 BN= 64 ns=3 nw= 4  0.3082 ms
+   gemm2 seq=   901  BM= 16 BN=256 ns=3 nw= 8  0.3288 ms
+      BM= 16 BN=256 ns=3 nw= 8  0.3288 ms <-
+      BM= 16 BN=128 ns=4 nw= 4  0.3676 ms
+      BM= 16 BN=128 ns=3 nw= 4  0.3687 ms
+   gemm1 seq= 11948  BM=128 BN= 64 ns=3 nw= 4  1.7737 ms
+      BM=128 BN= 64 ns=3 nw= 4  1.7737 ms <-
+      BM=128 BN= 64 ns=3 nw= 8  1.8414 ms
+      BM=128 BN=128 ns=2 nw= 8  1.9374 ms
+   gemm2 seq= 11948  BM= 16 BN=256 ns=3 nw= 8  3.3537 ms
+      BM= 16 BN=256 ns=3 nw= 8  3.3537 ms <-
+      BM= 16 BN=128 ns=3 nw= 4  3.8978 ms
+      BM= 16 BN=128 ns=4 nw= 4  3.9005 ms
+   gemm1 seq= 14107  BM=128 BN= 64 ns=3 nw= 4  2.2704 ms
+      BM=128 BN= 64 ns=3 nw= 4  2.2704 ms <-
+      BM=128 BN= 64 ns=3 nw= 8  2.4198 ms
+      BM=128 BN=128 ns=2 nw= 8  2.4305 ms
+   gemm2 seq= 14107  BM= 16 BN=256 ns=3 nw= 8  3.9332 ms
+      BM= 16 BN=256 ns=3 nw= 8  3.9332 ms <-
+      BM= 16 BN=128 ns=3 nw= 4  4.5742 ms
+      BM= 16 BN=128 ns=4 nw= 4  4.5783 ms
+
+==============================================================
+Paste into solution/triton/kernel.py:
+==============================================================
+_GEMM1_BEST = {
+    "1": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "7": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "14": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "15": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "16": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "32": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "52": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "53": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "54": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "55": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "56": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "57": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "58": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "59": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "62": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "80": [
+        16,
+        64,
+        3,
+        4
+    ],
+    "901": [
+        32,
+        128,
+        3,
+        4
+    ],
+    "11948": [
+        128,
+        64,
+        3,
+        4
+    ],
+    "14107": [
+        128,
+        64,
+        3,
+        4
+    ]
+}
+
+_GEMM2_BEST = {
+    "1": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "7": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "14": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "15": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "16": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "32": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "52": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "53": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "54": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "55": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "56": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "57": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "58": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "59": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "62": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "80": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "901": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "11948": [
+        16,
+        256,
+        3,
+        8
+    ],
+    "14107": [
+        16,
+        256,
+        3,
+        8
+    ]
+}
+
+[autotune] wrote JSON to trajectory/autotune-sweep/winners.json
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/xjr2423/main/ap-XYaNuA5Jg0cEnMcN366ehf

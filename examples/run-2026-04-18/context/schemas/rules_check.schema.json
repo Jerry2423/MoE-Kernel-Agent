@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://moe-kernel-agent/schemas/rules_check.schema.json",
+  "title": "RulesCheck",
+  "description": "Machine-readable companion to solution/rules_check.md. Validated by tools/check_rules.py as the Stage 2.4 gate.",
+  "type": "object",
+  "required": ["schema_version", "kernel_file", "rules"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "integer", "enum": [1]},
+    "kernel_file": {"type": "string", "description": "Relative path to the kernel being audited, e.g. 'solution/triton/kernel.py'."},
+    "rules": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["rule_id", "status", "evidence"],
+        "additionalProperties": false,
+        "properties": {
+          "rule_id": {"type": "integer", "minimum": 1, "maximum": 5, "description": "Matches numbering in RULES.md."},
+          "summary": {"type": "string"},
+          "status": {"type": "string", "enum": ["pass", "fail"]},
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["file", "line_start", "line_end"],
+              "additionalProperties": false,
+              "properties": {
+                "file": {"type": "string"},
+                "line_start": {"type": "integer", "minimum": 1},
+                "line_end": {"type": "integer", "minimum": 1},
+                "quote": {"type": "string"}
+              }
+            }
+          },
+          "notes": {"type": "string"}
+        }
+      }
+    }
+  }
+}

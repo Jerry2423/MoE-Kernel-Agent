@@ -1,0 +1,32 @@
+[
+  {
+    "class_id": "short_latency_bound",
+    "bottleneck": "Routing+dispatch composed of ~20 small torch CUDA kernels (gatherTopK, scatter, reduce, cub, index_* etc.) sums to ~44% of 0.58 ms kernel time at seq=1 — per-kernel launch overhead (~10us each) dominates over the actual math; GEMM1+GEMM2 are already tiny (~0.32 ms combined). The 0.94 ms measured end-to-end has ~0.36 ms of CPU-side / python-side overhead on top.",
+    "workload_indices": [0, 1, 2, 3, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+    "axes_range": {"seq_len": [1, 80]},
+    "representative_index": 1,
+    "target_metric": "end-to-end latency (ms) at seq=1 — proxy for routing+dispatch floor",
+    "best_runtime_ms": 0.373,
+    "winning_technique": "Triton-fused routing (iter 1) + two-pass Triton dispatch kernels replacing torch.argsort/bincount/index_select chain (iter 10) + `is_local.any()` sync removal (iter 7) + `-1` sentinel local-expert emission (iter 9) + fused fp32→bf16 cast kernel (iter 12). Short-class representative dropped 0.939→0.373 ms, 2.52× faster than Phase-2 autotuned baseline."
+  },
+  {
+    "class_id": "medium_mixed",
+    "bottleneck": "GEMM1+SwiGLU 43.6% + GEMM2+scatter 37.9% together account for 81% of 2.4 ms kernel time at seq=901; balanced split, neither GEMM saturates on its own. Routing overhead is still ~18%. Primary lever: per-GEMM efficiency (better pipeline overlap, tl.dot scaled, or intermediate quantization).",
+    "workload_indices": [4],
+    "axes_range": {"seq_len": [901, 901]},
+    "representative_index": 4,
+    "target_metric": "end-to-end latency (ms) at seq=901",
+    "best_runtime_ms": 1.202,
+    "winning_technique": "Benefits from every short-class dispatch / routing win (the same code path). Additional gain from iter 3 bf16 intermediate buffer (halves GEMM2 LHS HBM bytes) which targets the ~38% GEMM2-share for this class. Medium-class rep dropped 1.801→1.202 ms, 1.50× faster than Phase-2."
+  },
+  {
+    "class_id": "long_compute_bound",
+    "bottleneck": "GEMM2+scatter 55.6% + GEMM1+SwiGLU 33.3% together own 89% of 15.9 ms kernel time at seq=14107; GEMM2 is the clear single dominant kernel because its K=I=2048 is tiny but N=H=7168 × sum_Tk≈14k is enormous, and GEMM2's LHS is the fp32 SwiGLU intermediate (4× the HBM bytes of an FP8 LHS). Primary lever: quantize the GEMM1->GEMM2 intermediate to fp8 + block scale, and/or increase GEMM2 tile occupancy.",
+    "workload_indices": [8, 9],
+    "axes_range": {"seq_len": [11948, 14107]},
+    "representative_index": 8,
+    "target_metric": "end-to-end latency (ms) at seq=14107",
+    "best_runtime_ms": 7.279,
+    "winning_technique": "Only partial win: iter 3 bf16 intermediate (−2% on rep) + iter 7 sync drop (−1%). Class mean (11948+14107)/2 dropped 7.24→6.11 ms. Stuck after multiple attempts at native FP8 dot (numerical fail), scale-out-of-K-loop (pipeline disfusion), GROUP_M swizzle (no benefit at this tile count), fp8-intermediate quant kernel (compile error), persistent grids (compile error / L2 thrash). Primary remaining lever remains fp8 intermediate with a cleanly-structured quant kernel; requires a Triton-version-specific fp8 cast path."
+  }
+]

@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "kernel_file": "solution/triton/kernel.py",
+  "rules": [
+    {
+      "rule_id": 1,
+      "summary": "Core computation in Triton, not delegated to high-level PyTorch APIs.",
+      "status": "pass",
+      "evidence": [
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 124,
+          "line_end": 125,
+          "quote": "dot_up   = tl.dot(a_tile, tl.trans(w_up),   out_dtype=tl.float32)"
+        },
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 204,
+          "line_end": 204,
+          "quote": "dot   = tl.dot(c_tile, tl.trans(w_f32), out_dtype=tl.float32)"
+        },
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 50,
+          "line_end": 51,
+          "quote": "@triton.jit\ndef _gemm1_swiglu_kernel("
+        },
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 143,
+          "line_end": 144,
+          "quote": "@triton.jit\ndef _gemm2_scatter_kernel("
+        }
+      ],
+      "notes": "All matmul/dequant/SwiGLU/scatter logic runs in @triton.jit kernels; routing uses only primitive torch ops (sigmoid/topk/bincount/argsort/gather) — none of the forbidden high-level APIs from RULES.md §1."
+    },
+    {
+      "rule_id": 2,
+      "summary": "No trivial identity or no-op computation.",
+      "status": "pass",
+      "evidence": [
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 130,
+          "line_end": 131,
+          "quote": "silu_gate = acc_gate / (1.0 + tl.exp(-acc_gate))\n    result    = silu_gate * acc_up"
+        },
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 207,
+          "line_end": 212,
+          "quote": "acc = acc * gamma[:, None]"
+        }
+      ],
+      "notes": "Every kernel region does meaningful work: block-scaled FP8 dots, SwiGLU, atomic-scaled scatter-add — no 'output = input', '+0', or '*1.0' patterns."
+    },
+    {
+      "rule_id": 3,
+      "summary": "All required reference components are implemented.",
+      "status": "pass",
+      "evidence": [
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 237,
+          "line_end": 260,
+          "quote": "s      = torch.sigmoid(logits)"
+        },
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 130,
+          "line_end": 131,
+          "quote": "silu_gate = acc_gate / (1.0 + tl.exp(-acc_gate))"
+        },
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 116,
+          "line_end": 123,
+          "quote": "ws_up = tl.load(ws_up_ptrs, mask=n_mask, other=0.0)"
+        },
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 212,
+          "line_end": 212,
+          "quote": "tl.atomic_add(out_ptrs, acc, mask=m_mask[:, None] & n_mask[None, :], sem=\"relaxed\")"
+        }
+      ],
+      "notes": "Routing (sigmoid + group-top2 + top-4-groups + masked global-top-8 + normalize with +1e-20 and routed_scaling_factor), dispatch, GEMM1+SwiGLU (both dots + per-block scales + silu*up), and GEMM2 + gamma-weighted scatter — all present, matching input/torch_ref.py semantics."
+    },
+    {
+      "rule_id": 4,
+      "summary": "Kernel addresses a known performance bottleneck.",
+      "status": "pass",
+      "evidence": [
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 89,
+          "line_end": 126,
+          "quote": "num_kb = H_SZ // BK    # = 56"
+        },
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 181,
+          "line_end": 205,
+          "quote": "num_kb = I_SZ // BK    # = 16"
+        }
+      ],
+      "notes": "GEMM1 (K=H=7168) fused with SwiGLU, and GEMM2 (K=I=2048) fused with scatter — both canonical compute/bandwidth-bound stages of DeepSeek-V3 MoE, the exact operation the bench scores."
+    },
+    {
+      "rule_id": 5,
+      "summary": "Kernel makes efficient use of GPU parallelism.",
+      "status": "pass",
+      "evidence": [
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 63,
+          "line_end": 65,
+          "quote": "pid_e = tl.program_id(0)"
+        },
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 75,
+          "line_end": 81,
+          "quote": "offs_m = m_start + tl.arange(0, BLOCK_M)"
+        },
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 156,
+          "line_end": 175,
+          "quote": "pid_e = tl.program_id(0)"
+        },
+        {
+          "file": "solution/triton/kernel.py",
+          "line_start": 296,
+          "line_end": 296,
+          "quote": "_gemm1_swiglu_kernel[(E_LOCAL, max_tiles_m_g1, num_tiles_n_g1)]("
+        }
+      ],
+      "notes": "Both kernels use 3D (expert, m-tile, n-tile) program_id grids and BLOCK_M/BLOCK_N/BLOCK_K arange-based tiles. Grid scales with workload (E_LOCAL × ceil(max_Tk/BM) × (I or H)/BN)."
+    }
+  ]
+}

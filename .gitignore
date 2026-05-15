@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+*$py.class
+_bench_output.txt
+.claude/state/
+.claude/settings.local.json

@@ -1,0 +1,100 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(file *)",
+      "Bash(grep *)",
+      "Bash(rg *)",
+      "Bash(find *)",
+      "Bash(tree *)",
+      "Bash(which *)",
+      "Bash(env)",
+      "Bash(echo *)",
+      "Bash(pwd)",
+      "Bash(mkdir -p *)",
+      "Bash(chmod +x *)",
+      "Bash(git status *)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git show *)",
+      "Bash(git branch *)",
+      "Bash(git rev-parse *)",
+      "Bash(git add *)",
+      "Bash(git commit -m *)",
+      "Bash(git checkout -b *)",
+      "Bash(git switch *)",
+      "Bash(git restore --staged *)",
+      "Bash(python3 *)",
+      "Bash(python *)",
+      "Bash(python -m py_compile *)",
+      "Bash(python3 -m py_compile *)",
+      "Bash(python3 -c *)",
+      "Bash(python3 tools/*)",
+      "Bash(bash scripts/bench.sh *)",
+      "Bash(bash scripts/bench.sh)",
+      "Bash(modal volume get *)",
+      "Bash(modal volume ls *)",
+      "Bash(eval \"$(conda shell.bash hook)\" && conda activate fi-bench && modal run -m bench.modal_*)",
+      "Bash(eval \"$(conda shell.bash hook)\" && conda activate fi-bench && PYTHONPATH=. modal run -m bench.modal_*)"
+    ],
+    "deny": [
+      "Bash(git reset --hard *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git push --force-with-lease *)",
+      "Bash(rm -rf solution *)",
+      "Bash(rm -rf ./solution *)",
+      "Bash(rm -rf knowledge *)",
+      "Bash(rm -rf ./knowledge *)",
+      "Bash(rm -rf context *)",
+      "Bash(rm -rf ./context *)",
+      "Bash(rm -rf bench *)",
+      "Bash(rm -rf ./bench *)",
+      "Bash(rm -rf /*)",
+      "Bash(pip install *)",
+      "Bash(conda install *)",
+      "Bash(conda create *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session_start.sh" }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/user_prompt_submit.sh" }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/pre_bash.sh" }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/pre_edit.sh" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/stop.sh" }
+        ]
+      }
+    ]
+  }
+}

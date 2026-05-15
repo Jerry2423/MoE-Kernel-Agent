@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://moe-kernel-agent/schemas/subgraph_spec.schema.json",
+  "title": "SubgraphSpec",
+  "description": "One entry in solution/subgraph_specs.json. Produced by Phase 2.2, consumed by Phase 2.3 and Phase 3.C.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "type", "dtype", "ops", "input_shape", "output_shape", "count", "where", "source"],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9_-]*$",
+        "description": "Stable slug (lowercase, digits, underscore, hyphen). Used as dedup key."
+      },
+      "type": {"type": "string", "description": "Human-readable chain name."},
+      "data_layout": {"type": "string"},
+      "dtype": {"type": "string", "description": "Primary dtype, e.g. 'float16', 'fp8_e4m3'."},
+      "ops": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": ["op"],
+          "properties": {"op": {"type": "string"}},
+          "additionalProperties": true
+        }
+      },
+      "input_shape": {"type": "array", "items": {"type": ["string", "integer"]}},
+      "output_shape": {"type": "array", "items": {"type": ["string", "integer"]}},
+      "weights_original": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": ["string", "integer"]}}},
+      "weights_fused": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": ["string", "integer"]}}},
+      "count": {"type": "integer", "minimum": 1},
+      "where": {"type": "string", "description": "Call-site description."},
+      "source": {
+        "type": "object",
+        "required": ["module", "code"],
+        "properties": {
+          "module": {"type": "string"},
+          "code": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

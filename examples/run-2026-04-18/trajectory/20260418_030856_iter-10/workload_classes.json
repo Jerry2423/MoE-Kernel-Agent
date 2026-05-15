@@ -1,0 +1,26 @@
+[
+  {
+    "class_id": "short_latency_bound",
+    "bottleneck": "Routing+dispatch composed of ~20 small torch CUDA kernels (gatherTopK, scatter, reduce, cub, index_* etc.) sums to ~44% of 0.58 ms kernel time at seq=1 — per-kernel launch overhead (~10us each) dominates over the actual math; GEMM1+GEMM2 are already tiny (~0.32 ms combined). The 0.94 ms measured end-to-end has ~0.36 ms of CPU-side / python-side overhead on top.",
+    "workload_indices": [0, 1, 2, 3, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+    "axes_range": {"seq_len": [1, 80]},
+    "representative_index": 1,
+    "target_metric": "end-to-end latency (ms) at seq=1 — proxy for routing+dispatch floor"
+  },
+  {
+    "class_id": "medium_mixed",
+    "bottleneck": "GEMM1+SwiGLU 43.6% + GEMM2+scatter 37.9% together account for 81% of 2.4 ms kernel time at seq=901; balanced split, neither GEMM saturates on its own. Routing overhead is still ~18%. Primary lever: per-GEMM efficiency (better pipeline overlap, tl.dot scaled, or intermediate quantization).",
+    "workload_indices": [4],
+    "axes_range": {"seq_len": [901, 901]},
+    "representative_index": 4,
+    "target_metric": "end-to-end latency (ms) at seq=901"
+  },
+  {
+    "class_id": "long_compute_bound",
+    "bottleneck": "GEMM2+scatter 55.6% + GEMM1+SwiGLU 33.3% together own 89% of 15.9 ms kernel time at seq=14107; GEMM2 is the clear single dominant kernel because its K=I=2048 is tiny but N=H=7168 × sum_Tk≈14k is enormous, and GEMM2's LHS is the fp32 SwiGLU intermediate (4× the HBM bytes of an FP8 LHS). Primary lever: quantize the GEMM1->GEMM2 intermediate to fp8 + block scale, and/or increase GEMM2 tile occupancy.",
+    "workload_indices": [8, 9],
+    "axes_range": {"seq_len": [11948, 14107]},
+    "representative_index": 8,
+    "target_metric": "end-to-end latency (ms) at seq=14107"
+  }
+]

@@ -1,0 +1,120 @@
+[
+  {
+    "id": "routing-dsv3-noaux",
+    "type": "routing_dsv3_no_aux_topk_normalize",
+    "data_layout": "row-major per token over E_GLOBAL experts",
+    "dtype": "float32 (math), bfloat16 bias input, int64 indices output",
+    "ops": [
+      {"op": "sigmoid", "in": "logits", "out": "s"},
+      {"op": "add",     "in": ["s", "bias"], "out": "s_bias"},
+      {"op": "reshape", "shape": ["T", "N_GROUP=8", "GROUP_SZ=32"]},
+      {"op": "topk",    "k": 2, "dim": 2, "largest": true, "sorted": false},
+      {"op": "sum",     "dim": 2, "out": "group_score"},
+      {"op": "topk",    "k": 4, "dim": 1, "largest": true, "sorted": false, "out": "group_idx"},
+      {"op": "scatter_one_hot", "from": "group_idx", "out_shape": ["T", "N_GROUP"]},
+      {"op": "broadcast_reshape", "shape": ["T", "E_GLOBAL=256"]},
+      {"op": "masked_fill", "mask": "score_mask==0", "fill": "-inf"},
+      {"op": "topk",    "k": 8, "dim": 1, "largest": true, "sorted": false, "out": "topk_idx"},
+      {"op": "scatter_one_hot", "from": "topk_idx", "out_shape": ["T", "E_GLOBAL"]},
+      {"op": "mul",     "in": ["s", "M"], "out": "weights_raw"},
+      {"op": "sum",     "dim": 1, "keepdim": true, "out": "denom_raw"},
+      {"op": "add",     "in": ["denom_raw", "1e-20"], "out": "denom"},
+      {"op": "div",     "in": ["weights_raw", "denom"], "out": "weights_norm"},
+      {"op": "mul",     "in": ["weights_norm", "routed_scaling_factor"], "out": "weights"}
+    ],
+    "input_shape": ["T", "E_GLOBAL=256"],
+    "output_shape": ["T", "E_GLOBAL=256"],
+    "weights_original": {"routing_bias": ["E_GLOBAL=256"]},
+    "weights_fused":    {"routing_bias": ["E_GLOBAL=256"]},
+    "count": 1,
+    "where": "fused_reference.run() / routing() + normalize_weights()",
+    "source": {
+      "module": "routing + normalize_weights",
+      "code": "s = sigmoid(logits); s_bias = s + bias; top2 = topk(s_bias.view(T,N_GROUP,GROUP_SZ), k=2, dim=2); group_score = top2.sum(dim=2); group_idx = topk(group_score, k=TOPK_GRP, dim=1).indices; group_mask = scatter(zeros_like(group_score), 1, group_idx, 1.0); score_mask = group_mask.broadcast_reshape(T, E_GLOBAL); scores_pruned = s_bias.masked_fill(score_mask==0, -inf); topk_idx = topk(scores_pruned, k=TOP_K, dim=1).indices; M = scatter(zeros_like(s), 1, topk_idx, 1.0); weights = (s * M) / (sum+1e-20) * routed_scaling_factor"
+    }
+  },
+  {
+    "id": "dispatch-local-sort",
+    "type": "dispatch_local_expert_sort",
+    "data_layout": "flattened (token, expert, gamma) tuples sorted by expert",
+    "dtype": "int32 (tokens, hist), int64 (offsets), float32 (gamma)",
+    "ops": [
+      {"op": "subtract_scalar", "in": "topk_idx", "scalar": "local_expert_offset", "out": "local_experts"},
+      {"op": "mask_range", "low": 0, "high": "E_LOCAL=32", "out": "is_local"},
+      {"op": "boolean_mask", "in": "(arange(T), local_experts, gather(weights, topk_idx))", "mask": "is_local"},
+      {"op": "stable_argsort", "key": "e_indices"},
+      {"op": "gather", "with": "sort_idx", "on": ["t_indices", "e_indices", "gamma_all"]},
+      {"op": "bincount", "minlength": "E_LOCAL=32", "out": "hist"},
+      {"op": "cumsum",   "in": "hist", "dim": 0, "out": "offs[1:]"}
+    ],
+    "input_shape": ["T", "TOP_K=8"],
+    "output_shape": ["sum_Tk", "sum_Tk", "E_LOCAL=32", "E_LOCAL+1=33"],
+    "weights_original": {},
+    "weights_fused":    {},
+    "count": 1,
+    "where": "fused_reference.run() / dispatch()",
+    "source": {
+      "module": "dispatch",
+      "code": "local_experts = topk_idx - local_expert_offset; is_local = (local_experts>=0)&(local_experts<E_LOCAL); t_indices, e_indices, gamma_all = (arange(T)[is_local], local_experts[is_local], gather(weights,topk_idx)[is_local]); sort_idx = argsort(e_indices, stable=True); tokens_sorted = t_indices[sort_idx].int32(); gamma_sorted = gamma_all[sort_idx].float32(); hist = bincount(e_sorted, minlength=E_LOCAL); offs[1:] = hist.cumsum(0)"
+    }
+  },
+  {
+    "id": "gemm1-fp8-swiglu",
+    "type": "gemm1_fp8_block_scale_swiglu",
+    "data_layout": "grouped over local experts; per-expert [Tk_e, H] × [2I, H]^T → [Tk_e, 2I] → split → [Tk_e, I]",
+    "dtype": "float8_e4m3fn operands, float32 block scales, float32 output",
+    "ops": [
+      {"op": "gather_rows", "from": "A_fp8", "with": "tokens_sorted[s:en]", "out_shape": ["Tk_e", "H=7168"]},
+      {"op": "fp8_dot",     "lhs": "A_e", "rhs": "W13[e]^T", "out": "G1_e", "out_shape": ["Tk_e", "2I=4096"]},
+      {"op": "block_scale_apply", "a_scale_layout": "[H/128, T]", "w_scale_layout": "[E_LOCAL, 2I/128, H/128]", "block_k": 128},
+      {"op": "split",       "in": "G1_e", "dim": 1, "sizes": ["I=2048", "I=2048"], "out": ["X1", "X2"]},
+      {"op": "silu",        "form": "x / (1 + exp(-x))", "in": "X2", "out": "silu_X2"},
+      {"op": "mul",         "in": ["silu_X2", "X1"], "out": "intermediate[s:en]"}
+    ],
+    "input_shape": ["Tk_e", "H=7168"],
+    "output_shape": ["Tk_e", "I=2048"],
+    "weights_original": {
+      "gemm1_weights":       ["E_LOCAL=32", "2*I=4096", "H=7168"],
+      "gemm1_weights_scale": ["E_LOCAL=32", "2*I/128=32", "H/128=56"]
+    },
+    "weights_fused": {
+      "gemm1_weights":       ["E_LOCAL=32", "2*I=4096", "H=7168"],
+      "gemm1_weights_scale": ["E_LOCAL=32", "2*I/128=32", "H/128=56"]
+    },
+    "count": 1,
+    "where": "fused_reference.run() / gemm1_swiglu_per_expert() — one invocation per local expert, fused into a single Triton grid at Stage 2.3",
+    "source": {
+      "module": "gemm1_swiglu_per_expert",
+      "code": "for e in range(E_LOCAL):\n    s, en = offs[e].item(), offs[e+1].item()\n    toks = tokens_sorted[s:en].to(int64)\n    A_e  = A_fp32_scaled.index_select(0, toks)\n    G1_e = A_e @ W13_fp32[e].t()\n    X1, X2 = G1_e[:, :I_DIM], G1_e[:, I_DIM:]\n    silu = X2 / (1.0 + torch.exp(-X2))\n    intermediate[s:en] = silu * X1"
+    }
+  },
+  {
+    "id": "gemm2-fp8-weighted-scatter",
+    "type": "gemm2_fp8_block_scale_weighted_scatter",
+    "data_layout": "grouped over local experts; per-expert [Tk_e, I] × [H, I]^T → [Tk_e, H] → × gamma → atomic-add into [T, H]",
+    "dtype": "float32 activation, float8_e4m3fn weights, float32 scales, float32 atomic accumulator, bfloat16 final cast",
+    "ops": [
+      {"op": "fp8_dot",          "lhs": "intermediate[s:en]", "rhs": "W2[e]^T", "out": "O_e", "out_shape": ["Tk_e", "H=7168"]},
+      {"op": "block_scale_apply", "w_scale_layout": "[E_LOCAL, H/128, I/128]", "block_k": 128},
+      {"op": "mul",              "in": ["O_e", "gamma[s:en, None]"], "out": "O_weighted"},
+      {"op": "atomic_index_add", "into": "out_fp32", "index": "tokens_sorted[s:en]", "src": "O_weighted"},
+      {"op": "cast",             "in": "out_fp32", "out_dtype": "bfloat16", "scope": "final, once per run"}
+    ],
+    "input_shape": ["Tk_e", "I=2048"],
+    "output_shape": ["T", "H=7168"],
+    "weights_original": {
+      "gemm2_weights":       ["E_LOCAL=32", "H=7168", "I=2048"],
+      "gemm2_weights_scale": ["E_LOCAL=32", "H/128=56", "I/128=16"]
+    },
+    "weights_fused": {
+      "gemm2_weights":       ["E_LOCAL=32", "H=7168", "I=2048"],
+      "gemm2_weights_scale": ["E_LOCAL=32", "H/128=56", "I/128=16"]
+    },
+    "count": 1,
+    "where": "fused_reference.run() / gemm2_weighted_scatter_per_expert()",
+    "source": {
+      "module": "gemm2_weighted_scatter_per_expert",
+      "code": "for e in range(E_LOCAL):\n    s, en = offs[e].item(), offs[e+1].item()\n    toks  = tokens_sorted[s:en].to(int64)\n    C_e   = intermediate[s:en]\n    O_e   = C_e @ W2_fp32[e].t()\n    gamma = gamma_sorted[s:en].unsqueeze(1)\n    out_fp32.index_add_(0, toks, O_e * gamma)"
+    }
+  }
+]
